@@ -50,7 +50,7 @@ public class SceneManager {
         }
     }
 
-    public void setDirection(int key) {
+    public void handleKeyInputs(int key) {
 
         if (key == GLFW_KEY_SPACE) {
             startGame();

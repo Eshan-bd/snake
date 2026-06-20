@@ -2,7 +2,14 @@ package org.minigame;
 
 import org.minigame.utils.Vector2D;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
+
 public class GameMap {
+
+    private static final Path DEFAULT_MAP = Path.of("maps", "map_00.txt");
 
     private final Vector2D<Integer> bound;
     private int[][] grids;
@@ -23,10 +30,25 @@ public class GameMap {
 
         grids = new int[rows][columns];
 
-        for (int row=0; row<rows; row++) {
-            for (int col=0; col<columns; col++) {
+        List<String> mapRows;
+        try {
+            mapRows = Files.readAllLines(DEFAULT_MAP);
+        } catch (IOException e) {
+            throw new IllegalStateException("Failed to load map: " + DEFAULT_MAP, e);
+        }
 
-                grids[row][col] = 0;
+        if (mapRows.size() != rows) {
+            throw new IllegalStateException("Map " + DEFAULT_MAP + " must have " + rows + " rows");
+        }
+
+        for (int row = 0; row < rows; row++) {
+            String[] cells = mapRows.get(row).trim().split("\\s+");
+            if (cells.length != columns) {
+                throw new IllegalStateException("Map " + DEFAULT_MAP + " row " + row + " must have " + columns + " columns");
+            }
+
+            for (int col = 0; col < columns; col++) {
+                grids[row][col] = Integer.parseInt(cells[col]);
             }
         }
     }
