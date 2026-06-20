@@ -8,6 +8,7 @@ import org.lwjgl.system.MemoryStack;
 import org.minigame.utils.Vector2D;
 
 import java.nio.IntBuffer;
+import java.util.Objects;
 
 import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
 import static org.lwjgl.glfw.GLFW.GLFW_FALSE;
@@ -69,20 +70,21 @@ public class Renderer {
 
     private long window;
     private boolean glfwInitialized;
-    private Game game;
-    private GameMap gameMap;
-    private Snake snake;
+    private final Game game;
+    private final GameMap gameMap;
+    private final Snake snake;
+
+    public Renderer(Game game, GameMap gameMap, Snake snake) {
+        this.game = Objects.requireNonNull(game);
+        this.gameMap = Objects.requireNonNull(gameMap);
+        this.snake = Objects.requireNonNull(snake);
+    }
 
     public void run() {
         System.out.println("Hello LWJGL " + Version.getVersion() + "!");
 
         try {
             init();
-
-            snake = new Snake(1);
-            gameMap = new GameMap(new Vector2D<>(GameConfig.GRID_COLUMNS, GameConfig.GRID_ROWS));
-            game = new Game(snake, gameMap);
-
             loop();
         } finally {
             cleanUp();
@@ -176,10 +178,6 @@ public class Renderer {
     }
 
     private void handleKeyInput(int key) {
-        if (snake == null) {
-            return;
-        }
-
         Vector2D<Integer> nextDirection = directionForKey(key);
         if (nextDirection == null || isOppositeDirection(nextDirection, snake.getDirection())) {
             return;
@@ -272,9 +270,5 @@ public class Renderer {
         if (errorCallback != null) {
             errorCallback.free();
         }
-    }
-
-    public static void main(String[] args) {
-        new Renderer().run();
     }
 }
