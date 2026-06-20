@@ -19,6 +19,7 @@ import static org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_RIGHT;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_S;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_SPACE;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_UP;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_W;
 import static org.lwjgl.glfw.GLFW.GLFW_PRESS;
@@ -70,14 +71,10 @@ public class Renderer {
 
     private long window;
     private boolean glfwInitialized;
-    private final Game game;
-    private final GameMap gameMap;
-    private final Snake snake;
+    private final SceneManager sceneManager;
 
-    public Renderer(Game game, GameMap gameMap, Snake snake) {
-        this.game = Objects.requireNonNull(game);
-        this.gameMap = Objects.requireNonNull(gameMap);
-        this.snake = Objects.requireNonNull(snake);
+    public Renderer(SceneManager sceneManager) {
+        this.sceneManager = Objects.requireNonNull(sceneManager);
     }
 
     public void run() {
@@ -121,7 +118,7 @@ public class Renderer {
             }
 
             if (action == GLFW_PRESS || action == GLFW_REPEAT) {
-                handleKeyInput(key);
+                sceneManager.setDirection(key);
             }
         });
 
@@ -166,39 +163,22 @@ public class Renderer {
         while (!glfwWindowShouldClose(window)) {
             double now = glfwGetTime();
             if (now >= nextUpdate) {
-                game.update();
+                sceneManager.update();
                 nextUpdate = now + GameConfig.TICK_DELAY_MS / 1000.0;
             }
 
             glClear(GL_COLOR_BUFFER_BIT);
-            drawGrid();
+            drawScene();
             glfwSwapBuffers(window);
             glfwPollEvents();
         }
     }
 
     private void handleKeyInput(int key) {
-        Vector2D<Integer> nextDirection = directionForKey(key);
-        if (nextDirection == null || isOppositeDirection(nextDirection, snake.getDirection())) {
-            return;
-        }
 
-        snake.setDirection(nextDirection);
+
     }
 
-    private Vector2D<Integer> directionForKey(int key) {
-        return switch (key) {
-            case GLFW_KEY_UP, GLFW_KEY_W -> new Vector2D<>(0, -1);
-            case GLFW_KEY_DOWN, GLFW_KEY_S -> new Vector2D<>(0, 1);
-            case GLFW_KEY_LEFT, GLFW_KEY_A -> new Vector2D<>(-1, 0);
-            case GLFW_KEY_RIGHT, GLFW_KEY_D -> new Vector2D<>(1, 0);
-            default -> null;
-        };
-    }
-
-    private boolean isOppositeDirection(Vector2D<Integer> nextDirection, Vector2D<Integer> currentDirection) {
-        return nextDirection.x + currentDirection.x == 0 && nextDirection.y + currentDirection.y == 0;
-    }
 
     private void configureProjection() {
         glMatrixMode(GL_PROJECTION);
@@ -217,8 +197,26 @@ public class Renderer {
         }
     }
 
-    public void drawGrid() {
-        int[][] grid = gameMap.getMap();
+    private void drawScene() {
+        switch (sceneManager.getState()) {
+            case START -> drawStartScreen();
+            case RUNNING -> drawGrid();
+            case GAME_OVER -> drawGameOverScreen();
+        }
+    }
+
+    private void drawStartScreen() {
+        glColor3f(0.2f, 0.8f, 0.2f);
+        drawTextCentered("SPACE TO START", GameConfig.WINDOW_HEIGHT / 2, 3);
+    }
+
+    private void drawGameOverScreen() {
+        glColor3f(0.9f, 0.2f, 0.2f);
+        drawTextCentered("GAME OVER", GameConfig.WINDOW_HEIGHT / 2, 4);
+    }
+
+    private void drawGrid() {
+        int[][] grid = sceneManager.getGameMap().getMap();
 
         for (int row = 0; row < grid.length; row++) {
             for (int column = 0; column < grid[row].length; column++) {
@@ -252,6 +250,65 @@ public class Renderer {
         glVertex2i(x + size, y);
         glVertex2i(x + size, y + size);
         glVertex2i(x, y + size);
+        glEnd();
+    }
+
+    private void drawTextCentered(String text, int centerY, int scale) {
+        int textWidth = textWidth(text, scale);
+        int textHeight = 7 * scale;
+        int x = (GameConfig.WINDOW_WIDTH - textWidth) / 2;
+        int y = centerY - textHeight / 2;
+
+        drawText(text, x, y, scale);
+    }
+
+    private int textWidth(String text, int scale) {
+        return text.length() * 5 * scale + Math.max(0, text.length() - 1) * scale;
+    }
+
+    private void drawText(String text, int x, int y, int scale) {
+        int cursorX = x;
+        for (char letter : text.toUpperCase().toCharArray()) {
+            drawGlyph(letter, cursorX, y, scale);
+            cursorX += 6 * scale;
+        }
+    }
+
+    private void drawGlyph(char letter, int x, int y, int scale) {
+        String[] glyph = glyph(letter);
+
+        for (int row = 0; row < glyph.length; row++) {
+            for (int column = 0; column < glyph[row].length(); column++) {
+                if (glyph[row].charAt(column) == '1') {
+                    drawRect(x + column * scale, y + row * scale, scale, scale);
+                }
+            }
+        }
+    }
+
+    private String[] glyph(char letter) {
+        return switch (letter) {
+            case 'A' -> new String[]{"01110", "10001", "10001", "11111", "10001", "10001", "10001"};
+            case 'C' -> new String[]{"01111", "10000", "10000", "10000", "10000", "10000", "01111"};
+            case 'E' -> new String[]{"11111", "10000", "10000", "11110", "10000", "10000", "11111"};
+            case 'G' -> new String[]{"01111", "10000", "10000", "10111", "10001", "10001", "01111"};
+            case 'M' -> new String[]{"10001", "11011", "10101", "10101", "10001", "10001", "10001"};
+            case 'O' -> new String[]{"01110", "10001", "10001", "10001", "10001", "10001", "01110"};
+            case 'P' -> new String[]{"11110", "10001", "10001", "11110", "10000", "10000", "10000"};
+            case 'R' -> new String[]{"11110", "10001", "10001", "11110", "10100", "10010", "10001"};
+            case 'S' -> new String[]{"01111", "10000", "10000", "01110", "00001", "00001", "11110"};
+            case 'T' -> new String[]{"11111", "00100", "00100", "00100", "00100", "00100", "00100"};
+            case 'V' -> new String[]{"10001", "10001", "10001", "10001", "10001", "01010", "00100"};
+            default -> new String[]{"00000", "00000", "00000", "00000", "00000", "00000", "00000"};
+        };
+    }
+
+    private void drawRect(int x, int y, int width, int height) {
+        glBegin(GL_QUADS);
+        glVertex2i(x, y);
+        glVertex2i(x + width, y);
+        glVertex2i(x + width, y + height);
+        glVertex2i(x, y + height);
         glEnd();
     }
 

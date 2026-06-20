@@ -11,7 +11,8 @@ public class Main {
         var snake = new Snake(1);
         var gameMap = new GameMap(new Vector2D<>(GameConfig.GRID_COLUMNS, GameConfig.GRID_ROWS));
         var game = new Game(snake, gameMap);
+        var sceneManager = new SceneManager(game, gameMap, snake);
 
-        new Renderer(game, gameMap, snake).run();
+        new Renderer(sceneManager).run();
     }
 }

@@ -44,9 +44,12 @@ public class Snake {
         return direction;
     }
 
-    public void setDirection(Vector2D<Integer> direction) {
-        this.direction.x = direction.x;
-        this.direction.y = direction.y;
+    public void setDirection(Vector2D<Integer> nextDirection) {
+        if (isOppositeDirection(nextDirection, this.direction))
+            return;
+
+        this.direction.x = nextDirection.x;
+        this.direction.y = nextDirection.y;
     }
 
     public int getSpeed() {
@@ -55,5 +58,9 @@ public class Snake {
 
     public List<Vector2D<Integer>> getBody() {
         return List.copyOf(queue);
+    }
+
+    private boolean isOppositeDirection(Vector2D<Integer> nextDirection, Vector2D<Integer> currentDirection) {
+        return nextDirection.x + currentDirection.x == -1 && nextDirection.y + currentDirection.y == 0;
     }
 }
