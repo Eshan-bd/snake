@@ -41,6 +41,9 @@ public class SceneManager {
     public void startGame() {
         if (state == GameState.START) {
             state = GameState.RUNNING;
+        } else if (state == GameState.GAME_OVER) {
+            game.reset();
+            state = GameState.RUNNING;
         }
     }
 

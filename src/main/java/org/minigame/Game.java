@@ -4,16 +4,21 @@ public class Game {
 
     private final Snake snake;
     private final GameMap gameMap;
+    private int cycles;
 
     private int score;
 
     public Game(Snake snake, GameMap gameMap) {
         this.snake = snake;
         this.gameMap = gameMap;
+        cycles = 0;
 
-        for (var v: snake.getBody())
+        drawSnake();
+    }
+
+    private void drawSnake() {
+        for (var v : snake.getBody())
             gameMap.setGrid(v, -1);
-
     }
 
     public boolean update() {
@@ -25,24 +30,22 @@ public class Game {
             return false;
         }
 
-        int grid = gameMap.getGrid(head);
-
-        if (grid < 0) {
-            return false;
-        }
-
+        GridState grid = gameMap.getGridState(head);
 
         boolean grow = false;
-        switch(grid) {
-            case 1:
+        switch (grid) {
+            case SNAKE:
                 return false;
 
-            case 2:
+            case OBSTACLE:
+                return false;
+
+            case Food:
                 grow = true;
                 score += 1;
                 break;
 
-            case 3:
+            case BigFood:
                 score += 10;
                 break;
         }
@@ -55,7 +58,20 @@ public class Game {
 
         snake.setHead(head);
 
+        gameMap.updateFood(cycles);
+
+        cycles++;
+        if (cycles == Integer.MAX_VALUE)
+            return false;
+
         return true;
+    }
+
+    public void reset() {
+        gameMap.reset();
+        snake.resetPosition();
+        drawSnake();
+        cycles = 0;
     }
 
     public int getScore() {

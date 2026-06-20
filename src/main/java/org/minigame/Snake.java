@@ -18,11 +18,7 @@ public class Snake {
         this.speed = speed;
         this.queue = new ArrayDeque<>();
 
-        for (int i=0; i<3; i++)
-            queue.add(new Vector2D<>(i, 0));
-
-        this.head = queue.peekLast();
-        this.tail = queue.peekFirst();
+        resetPosition();
         this.direction = new Vector2D<>(1, 0);
     }
 
@@ -45,7 +41,7 @@ public class Snake {
     }
 
     public void setDirection(Vector2D<Integer> nextDirection) {
-        if (isOppositeDirection(nextDirection, this.direction))
+        if (isOppositeDirection(nextDirection))
             return;
 
         this.direction.x = nextDirection.x;
@@ -60,7 +56,17 @@ public class Snake {
         return List.copyOf(queue);
     }
 
-    private boolean isOppositeDirection(Vector2D<Integer> nextDirection, Vector2D<Integer> currentDirection) {
+    private boolean isOppositeDirection(Vector2D<Integer> nextDirection) {
+        var currentDirection = this.direction;
         return nextDirection.x + currentDirection.x == -1 && nextDirection.y + currentDirection.y == 0;
+    }
+
+    public void resetPosition() {
+        queue.clear();
+        for (int i=0; i<3; i++)
+            queue.add(new Vector2D<>(i, 0));
+
+        this.head = queue.peekLast();
+        this.tail = queue.peekFirst();
     }
 }
