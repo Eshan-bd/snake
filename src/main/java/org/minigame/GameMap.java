@@ -101,10 +101,10 @@ public class GameMap {
             food = generateRandomPosition();
             setGrid(food, 2);
         }
-        if (cycles % 5 == 0) {
+        if (cycles % 30 == 0) {
             bigFood = generateRandomPosition();
             setGrid(bigFood, 3);
-        } else if (bigFood != null && getGridState(bigFood) == GridState.BigFood && cycles % 5 > 2) {
+        } else if (bigFood != null && getGridState(bigFood) == GridState.BigFood && cycles % 30 > 15) {
             setGrid(bigFood, 0);
             bigFood = null;
         }

@@ -26,9 +26,8 @@ public class Game {
 
         var head = snake.getHead().add(snake.getDirection());
 
-        if (head.x < 0 || head.x >= bound.x || head.y < 0 || head.y >= bound.y) {
-            return false;
-        }
+        head.x = (head.x + bound.x) % bound.x;
+        head.y = (head.y + bound.y) % bound.y;
 
         GridState grid = gameMap.getGridState(head);
 
