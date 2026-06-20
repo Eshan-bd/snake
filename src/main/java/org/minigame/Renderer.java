@@ -11,8 +11,18 @@ import java.nio.IntBuffer;
 
 import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
 import static org.lwjgl.glfw.GLFW.GLFW_FALSE;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_A;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_D;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_DOWN;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_RIGHT;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_S;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_UP;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_W;
+import static org.lwjgl.glfw.GLFW.GLFW_PRESS;
 import static org.lwjgl.glfw.GLFW.GLFW_RELEASE;
+import static org.lwjgl.glfw.GLFW.GLFW_REPEAT;
 import static org.lwjgl.glfw.GLFW.GLFW_RESIZABLE;
 import static org.lwjgl.glfw.GLFW.GLFW_TRUE;
 import static org.lwjgl.glfw.GLFW.GLFW_VISIBLE;
@@ -61,6 +71,7 @@ public class Renderer {
     private boolean glfwInitialized;
     private Game game;
     private GameMap gameMap;
+    private Snake snake;
 
     public void run() {
         System.out.println("Hello LWJGL " + Version.getVersion() + "!");
@@ -68,7 +79,7 @@ public class Renderer {
         try {
             init();
 
-            Snake snake = new Snake(1);
+            snake = new Snake(1);
             gameMap = new GameMap(new Vector2D<>(GameConfig.GRID_COLUMNS, GameConfig.GRID_ROWS));
             game = new Game(snake, gameMap);
 
@@ -104,6 +115,11 @@ public class Renderer {
         glfwSetKeyCallback(window, (handle, key, scanCode, action, modifiers) -> {
             if (key == GLFW_KEY_ESCAPE && action == GLFW_RELEASE) {
                 glfwSetWindowShouldClose(handle, true);
+                return;
+            }
+
+            if (action == GLFW_PRESS || action == GLFW_REPEAT) {
+                handleKeyInput(key);
             }
         });
 
@@ -157,6 +173,33 @@ public class Renderer {
             glfwSwapBuffers(window);
             glfwPollEvents();
         }
+    }
+
+    private void handleKeyInput(int key) {
+        if (snake == null) {
+            return;
+        }
+
+        Vector2D<Integer> nextDirection = directionForKey(key);
+        if (nextDirection == null || isOppositeDirection(nextDirection, snake.getDirection())) {
+            return;
+        }
+
+        snake.setDirection(nextDirection);
+    }
+
+    private Vector2D<Integer> directionForKey(int key) {
+        return switch (key) {
+            case GLFW_KEY_UP, GLFW_KEY_W -> new Vector2D<>(0, -1);
+            case GLFW_KEY_DOWN, GLFW_KEY_S -> new Vector2D<>(0, 1);
+            case GLFW_KEY_LEFT, GLFW_KEY_A -> new Vector2D<>(-1, 0);
+            case GLFW_KEY_RIGHT, GLFW_KEY_D -> new Vector2D<>(1, 0);
+            default -> null;
+        };
+    }
+
+    private boolean isOppositeDirection(Vector2D<Integer> nextDirection, Vector2D<Integer> currentDirection) {
+        return nextDirection.x + currentDirection.x == 0 && nextDirection.y + currentDirection.y == 0;
     }
 
     private void configureProjection() {

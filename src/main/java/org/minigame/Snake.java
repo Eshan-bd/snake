@@ -44,6 +44,11 @@ public class Snake {
         return direction;
     }
 
+    public void setDirection(Vector2D<Integer> direction) {
+        this.direction.x = direction.x;
+        this.direction.y = direction.y;
+    }
+
     public int getSpeed() {
         return this.speed;
     }
