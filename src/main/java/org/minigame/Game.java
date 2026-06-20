@@ -57,4 +57,8 @@ public class Game {
 
         return true;
     }
+
+    public int getScore() {
+        return score;
+    }
 }

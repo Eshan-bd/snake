@@ -164,12 +164,6 @@ public class Renderer {
         }
     }
 
-    private void handleKeyInput(int key) {
-
-
-    }
-
-
     private void configureProjection() {
         glMatrixMode(GL_PROJECTION);
         glLoadIdentity();
@@ -190,9 +184,14 @@ public class Renderer {
     private void drawScene() {
         switch (sceneManager.getState()) {
             case START -> drawStartScreen();
-            case RUNNING -> drawGrid();
+            case RUNNING -> drawRunningScene();
             case GAME_OVER -> drawGameOverScreen();
         }
+    }
+
+    private void drawRunningScene() {
+        drawGrid();
+        drawScore();
     }
 
     private void drawStartScreen() {
@@ -203,6 +202,17 @@ public class Renderer {
     private void drawGameOverScreen() {
         glColor3f(0.9f, 0.2f, 0.2f);
         drawTextCentered("GAME OVER", GameConfig.WINDOW_HEIGHT / 2, 4);
+    }
+
+    private void drawScore() {
+        String scoreText = "SCORE " + sceneManager.getScore();
+        int scale = 2;
+        int padding = 6;
+        int x = GameConfig.WINDOW_WIDTH - textWidth(scoreText, scale) - padding;
+        int y = padding;
+
+        glColor3f(1.0f, 1.0f, 1.0f);
+        drawText(scoreText, x, y, scale);
     }
 
     private void drawGrid() {
@@ -278,6 +288,16 @@ public class Renderer {
 
     private String[] glyph(char letter) {
         return switch (letter) {
+            case '0' -> new String[]{"01110", "10001", "10011", "10101", "11001", "10001", "01110"};
+            case '1' -> new String[]{"00100", "01100", "00100", "00100", "00100", "00100", "01110"};
+            case '2' -> new String[]{"01110", "10001", "00001", "00010", "00100", "01000", "11111"};
+            case '3' -> new String[]{"11110", "00001", "00001", "01110", "00001", "00001", "11110"};
+            case '4' -> new String[]{"00010", "00110", "01010", "10010", "11111", "00010", "00010"};
+            case '5' -> new String[]{"11111", "10000", "10000", "11110", "00001", "00001", "11110"};
+            case '6' -> new String[]{"01110", "10000", "10000", "11110", "10001", "10001", "01110"};
+            case '7' -> new String[]{"11111", "00001", "00010", "00100", "01000", "01000", "01000"};
+            case '8' -> new String[]{"01110", "10001", "10001", "01110", "10001", "10001", "01110"};
+            case '9' -> new String[]{"01110", "10001", "10001", "01111", "00001", "00001", "01110"};
             case 'A' -> new String[]{"01110", "10001", "10001", "11111", "10001", "10001", "10001"};
             case 'C' -> new String[]{"01111", "10000", "10000", "10000", "10000", "10000", "01111"};
             case 'E' -> new String[]{"11111", "10000", "10000", "11110", "10000", "10000", "11111"};

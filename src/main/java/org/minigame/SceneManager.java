@@ -34,6 +34,10 @@ public class SceneManager {
         return gameMap;
     }
 
+    public int getScore() {
+        return game.getScore();
+    }
+
     public void startGame() {
         if (state == GameState.START) {
             state = GameState.RUNNING;
