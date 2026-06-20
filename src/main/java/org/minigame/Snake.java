@@ -17,9 +17,9 @@ public class Snake {
     public Snake(int speed) {
         this.speed = speed;
         this.queue = new ArrayDeque<>();
+        this.direction = new Vector2D<>(1, 0);
 
         resetPosition();
-        this.direction = new Vector2D<>(1, 0);
     }
 
     public Vector2D<Integer> getHead() {
@@ -58,7 +58,7 @@ public class Snake {
 
     private boolean isOppositeDirection(Vector2D<Integer> nextDirection) {
         var currentDirection = this.direction;
-        return nextDirection.x + currentDirection.x == -1 && nextDirection.y + currentDirection.y == 0;
+        return nextDirection.x + currentDirection.x == 0 || nextDirection.y + currentDirection.y == 0;
     }
 
     public void resetPosition() {
@@ -68,5 +68,7 @@ public class Snake {
 
         this.head = queue.peekLast();
         this.tail = queue.peekFirst();
+        this.direction.x = 1;
+        this.direction.y = 0;
     }
 }
