@@ -1,0 +1,33 @@
+# Build output
+target/
+out/
+build/
+
+# Maven wrapper downloads and local Maven config
+.mvn/wrapper/maven-wrapper.jar
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+
+# Local assistant/tooling state
+.ai/
+
+# Java runtime dumps
+hs_err_pid*
+replay_pid*
+
+# Logs
+*.log
+
+# OS metadata
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*~
